@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ExamGuard - Student Dashboard</title>
+<link rel="stylesheet" href="/static/darkmode.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(-45deg,#0f172a,#1e1b4b,#312e81,#1e3a8a);background-size:400% 400%;animation:gradient 15s ease infinite;color:#f1f5f9;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;background:rgba(30,41,59,0.95);backdrop-filter:blur(20px);border-bottom:2px solid rgba(59,130,246,0.3);position:sticky;top:0;z-index:100}
+.logo{font-size:1.5rem;font-weight:800;color:#60a5fa}
+.logout-btn{padding:0.65rem 1.4rem;border-radius:10px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;cursor:pointer;font-weight:700;font-size:0.95rem;transition:all 0.3s ease}
+.logout-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(239,68,68,0.4)}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+.profile-card{background:rgba(30,41,59,0.95);backdrop-filter:blur(20px);border-radius:20px;padding:2rem;margin-bottom:2rem;border:1px solid rgba(71,85,105,0.5)}
+.profile-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem}
+.avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.profile-info h2{font-size:1.8rem;margin-bottom:0.3rem}
+.profile-info p{color:#94a3b8;font-size:0.95rem}
+.profile-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;padding:1.5rem;background:rgba(15,23,42,0.5);border-radius:15px}
+.detail-item{display:flex;align-items:center;gap:0.8rem}
+.detail-icon{font-size:1.3rem}
+.detail-text{flex:1}
+.detail-label{font-size:0.85rem;color:#64748b;display:block}
+.detail-value{font-size:1rem;color:#f1f5f9;font-weight:600}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin-bottom:2rem}
+.stat-card{background:rgba(30,41,59,0.95);backdrop-filter:blur(20px);border-radius:15px;padding:1.5rem;border:1px solid rgba(71,85,105,0.5);text-align:center}
+.stat-icon{font-size:2.5rem;margin-bottom:0.5rem}
+.stat-number{font-size:2rem;font-weight:800;color:#60a5fa;margin:0.5rem 0}
+.stat-label{color:#94a3b8;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em}
+.section-title{font-size:1.5rem;margin-bottom:1rem;color:#f1f5f9}
+.sessions-table{background:rgba(30,41,59,0.95);backdrop-filter:blur(20px);border-radius:15px;padding:1.5rem;border:1px solid rgba(71,85,105,0.5);overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:1rem;border-bottom:2px solid rgba(71,85,105,0.5);color:#94a3b8;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em}
+td{padding:1rem;border-bottom:1px solid rgba(71,85,105,0.3)}
+.status-badge{padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;font-weight:600;display:inline-block}
+.status-completed{background:rgba(16,185,129,0.2);color:#10b981;border:1px solid #10b981}
+.status-terminated{background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid #ef4444}
+.status-active{background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid #3b82f6}
+.no-sessions{text-align:center;padding:3rem;color:#64748b}
+.btn-primary{padding:0.8rem 1.5rem;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-weight:700;font-size:0.95rem;transition:all 0.3s ease;text-decoration:none;display:inline-block}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,185,129,0.4)}
+</style>
+</head>
+<body>
+<div class="topbar">
+<div class="logo">🎓 ExamGuard</div>
+<button class="logout-btn" onclick="logout()">🚪 Logout</button>
+</div>
+
+<div class="container">
+<div class="profile-card">
+<div class="profile-header">
+<div class="avatar">👤</div>
+<div class="profile-info">
+<h2>{{ student.name }}</h2>
+<p>{{ student.register_no }}</p>
+</div>
+</div>
+<div class="profile-details">
+<div class="detail-item">
+<div class="detail-icon">📧</div>
+<div class="detail-text">
+<span class="detail-label">Email</span>
+<span class="detail-value">{{ student.email }}</span>
+</div>
+</div>
+<div class="detail-item">
+<div class="detail-icon">📱</div>
+<div class="detail-text">
+<span class="detail-label">Phone</span>
+<span class="detail-value">{{ student.phone }}</span>
+</div>
+</div>
+<div class="detail-item">
+<div class="detail-icon">🏫</div>
+<div class="detail-text">
+<span class="detail-label">College</span>
+<span class="detail-value">{{ student.college_name }}</span>
+</div>
+</div>
+<div class="detail-item">
+<div class="detail-icon">📅</div>
+<div class="detail-text">
+<span class="detail-label">Joined</span>
+<span class="detail-value">{{ student.created_at|date:"M d, Y" }}</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-icon">📝</div>
+<div class="stat-number">{{ total_sessions }}</div>
+<div class="stat-label">Total Exams</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">✅</div>
+<div class="stat-number">{{ completed_sessions }}</div>
+<div class="stat-label">Completed</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">🔴</div>
+<div class="stat-number">{{ terminated_sessions }}</div>
+<div class="stat-label">Terminated</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">⚠️</div>
+<div class="stat-number">{{ total_violations }}</div>
+<div class="stat-label">Total Violations</div>
+</div>
+</div>
+
+<h3 class="section-title">📋 Exam History</h3>
+<div class="sessions-table">
+{% if sessions %}
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Duration</th>
+<th>Status</th>
+<th>Violations</th>
+<th>Reasons</th>
+</tr>
+</thead>
+<tbody>
+{% for session in sessions %}
+<tr>
+<td>{{ session.started_at|date:"M d, Y H:i" }}</td>
+<td>
+{% if session.ended_at %}
+{{ session.ended_at|timesince:session.started_at }}
+{% else %}
+In Progress
+{% endif %}
+</td>
+<td>
+<span class="status-badge status-{{ session.status }}">
+{{ session.status|title }}
+</span>
+</td>
+<td>{{ session.violations }}</td>
+<td>{{ session.violation_reasons|default:"None" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<div class="no-sessions">
+<p>📭 No exam history yet</p>
+<a href="/exam/" class="btn-primary" style="margin-top:1rem">🚀 Start Your First Exam</a>
+</div>
+{% endif %}
+</div>
+</div>
+
+<script>
+async function logout(){
+await fetch('/logout/',{method:'POST',headers:{'Content-Type':'application/json'}}).catch(()=>{});
+window.location.href='/';
+}
+</script>
+<script src="/static/darkmode.js"></script>
+</body>
+</html>

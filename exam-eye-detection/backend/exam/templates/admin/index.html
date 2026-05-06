@@ -1,0 +1,274 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="/static/darkmode.css">
+<style>
+#content-main {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.dashboard-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.dashboard-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #667eea;
+    margin: 10px 0;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.action-btn {
+    background: white;
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    color: #667eea;
+    text-decoration: none;
+}
+
+.action-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.recent-activity {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.recent-activity h2 {
+    color: #667eea;
+    margin: 0 0 20px 0;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+.activity-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.activity-text {
+    flex: 1;
+    text-align: left;
+}
+
+.activity-text strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.activity-text small {
+    color: #666;
+}
+
+.activity-time {
+    color: #999;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+/* Fix module alignment */
+.module {
+    margin: 0 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .activity-time {
+        text-align: left;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extrahead %}
+<script src="/static/darkmode.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>ExamGuard System</h1>
+    <p>Eye Detection & Monitoring Dashboard</p>
+</div>
+
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number">{{ total_students }}</div>
+        <div class="stat-label">Total Students</div>
+        <a href="/admin-api/students/" style="display:block;margin-top:10px;color:#667eea;text-decoration:none;font-weight:600;font-size:.9rem">View All →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-number">{{ total_sessions }}</div>
+        <div class="stat-label">Exam Sessions</div>
+        <a href="/admin-api/sessions/" style="display:block;margin-top:10px;color:#667eea;text-decoration:none;font-weight:600;font-size:.9rem">Manage All →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">{{ active_sessions }}</div>
+        <div class="stat-label">Active Now</div>
+        <a href="/admin-api/sessions/?status=active" style="display:block;margin-top:10px;color:#667eea;text-decoration:none;font-weight:600;font-size:.9rem">View Active →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-number">{{ total_violations }}</div>
+        <div class="stat-label">Total Violations</div>
+        <a href="/admin-api/violations/" style="display:block;margin-top:10px;color:#667eea;text-decoration:none;font-weight:600;font-size:.9rem">View Report →</a>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="/admin-api/students/" class="action-btn">
+        <span class="action-icon">👤</span>
+        Manage Students
+    </a>
+    
+    <a href="/admin-api/sessions/" class="action-btn">
+        <span class="action-icon">📝</span>
+        Manage Sessions
+    </a>
+    
+    <a href="/admin-api/violations/" class="action-btn">
+        <span class="action-icon">⚠️</span>
+        Violations Report
+    </a>
+    
+    <a href="/" class="action-btn">
+        <span class="action-icon">🏠</span>
+        Student Portal
+    </a>
+</div>
+
+<div class="recent-activity">
+    <h2>📋 Recent Activity</h2>
+    {% for session in recent_sessions %}
+    <div class="activity-item">
+        <div class="activity-icon">
+            {% if session.status == 'active' %}🟢
+            {% elif session.status == 'completed' %}✅
+            {% else %}🔴{% endif %}
+        </div>
+        <div class="activity-text">
+            <strong>{{ session.student.name }}</strong> ({{ session.student.register_no }})
+            <br>
+            <small>{{ session.status|title }} - {{ session.violations }} violation(s)</small>
+        </div>
+        <div class="activity-time">{{ session.started_at|timesince }} ago</div>
+    </div>
+    {% empty %}
+    <p style="text-align: center; color: #999; padding: 20px;">No recent activity</p>
+    {% endfor %}
+</div>
+{% endblock %}

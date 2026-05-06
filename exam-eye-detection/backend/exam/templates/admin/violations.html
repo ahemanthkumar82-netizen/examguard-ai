@@ -1,0 +1,392 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+#content-main{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;border-radius:15px;margin:20px 0;animation:fadeIn .6s ease-out}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;animation:slideIn .6s ease-out .1s both}
+.page-header h1{color:#fff;font-size:2rem;margin:0;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+.back-btn{background:#6b7280;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;transition:all .3s ease;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(107,114,128,.3)}
+.back-btn:hover{background:#4b5563;transform:translateY(-2px);box-shadow:0 6px 20px rgba(107,114,128,.4);text-decoration:none;color:#fff}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px;animation:fadeIn .6s ease-out .2s both}
+.stat-box{background:#fff;padding:20px;border-radius:12px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+.stat-box-icon{font-size:2.5rem;margin-bottom:10px}
+.stat-box-number{font-size:2rem;font-weight:800;color:#667eea;margin-bottom:5px}
+.stat-box-label{color:#6b7280;font-size:.9rem;font-weight:600;text-transform:uppercase}
+.filter-bar{background:#fff;padding:15px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.1);animation:fadeIn .6s ease-out .3s both;display:flex;gap:15px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:10px 15px;border:2px solid #e5e7eb;border-radius:10px;font-size:.95rem;outline:0;transition:all .3s ease}
+.filter-bar select:focus,.filter-bar input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+.filter-bar select{flex:1;min-width:150px}
+.filter-bar input{flex:2;min-width:250px}
+.violations-table{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:fadeIn .6s ease-out .4s both}
+table{width:100%;border-collapse:collapse}
+thead{background:linear-gradient(135deg,#667eea,#764ba2)}
+thead th{color:#fff;padding:18px 15px;text-align:left;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.5px}
+tbody tr{border-bottom:1px solid #e5e7eb;transition:all .3s ease}
+tbody tr:hover{background:#f9fafb}
+tbody td{padding:15px;color:#374151;font-size:.95rem}
+.student-info{display:flex;flex-direction:column;gap:5px}
+.student-name{font-weight:700;color:#1f2937;font-size:1rem}
+.student-regno{color:#6b7280;font-size:.85rem}
+.student-contact{color:#9ca3af;font-size:.8rem}
+.violation-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-weight:700;font-size:.85rem}
+.violation-low{background:#fef3c7;color:#92400e;border:1px solid #fbbf24}
+.violation-medium{background:#fed7aa;color:#9a3412;border:1px solid #fb923c}
+.violation-high{background:#fecaca;color:#991b1b;border:1px solid #ef4444}
+.violation-critical{background:#fce7f3;color:#831843;border:1px solid #ec4899}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-weight:700;font-size:.85rem}
+.status-active{background:#d1fae5;color:#065f46;border:1px solid #10b981}
+.status-completed{background:#dbeafe;color:#1e40af;border:1px solid #3b82f6}
+.status-terminated{background:#fee2e2;color:#991b1b;border:1px solid #ef4444}
+.violation-reasons{color:#6b7280;font-size:.85rem;line-height:1.5;max-width:300px}
+.violation-reasons strong{display:block;color:#374151;margin-bottom:5px}
+.btn{padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem;transition:all .3s ease;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.btn-details{background:#667eea;color:#fff}
+.btn-details:hover{background:#5568d3;transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,.3);text-decoration:none;color:#fff}
+.btn-delete{background:#ef4444;color:#fff}
+.btn-delete:hover{background:#dc2626;transform:translateY(-2px);box-shadow:0 4px 12px rgba(239,68,68,.3)}
+.empty-state{text-align:center;padding:60px 20px;color:#6b7280}
+.empty-state-icon{font-size:4rem;margin-bottom:20px;opacity:.5}
+.empty-state-text{font-size:1.2rem;font-weight:600;margin-bottom:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;animation:fadeIn .3s ease-out}
+.modal-content{background:#fff;border-radius:20px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideIn .4s ease-out}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #e5e7eb}
+.modal-header h2{margin:0;color:#1f2937;font-size:1.5rem}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6b7280;transition:all .3s ease;padding:5px 10px;border-radius:8px}
+.modal-close:hover{background:#f3f4f6;color:#1f2937}
+.detail-section{margin-bottom:20px;padding:15px;background:#f9fafb;border-radius:10px}
+.detail-label{color:#667eea;font-weight:700;font-size:.85rem;text-transform:uppercase;margin-bottom:8px;display:block}
+.detail-value{color:#1f2937;font-size:1rem;line-height:1.6}
+.timeline{margin-top:20px}
+.timeline-item{display:flex;gap:15px;margin-bottom:15px;padding:15px;background:#f9fafb;border-radius:10px;border-left:4px solid #667eea}
+.timeline-icon{font-size:1.5rem;flex-shrink:0}
+.timeline-content{flex:1}
+.timeline-title{font-weight:700;color:#1f2937;margin-bottom:5px}
+.timeline-text{color:#6b7280;font-size:.9rem}
+.timeline-time{color:#9ca3af;font-size:.8rem;margin-top:5px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚠️ Violations Report</h1>
+    <a href="/admin/" class="back-btn">
+        <span>🔙</span> Back to Dashboard
+    </a>
+</div>
+
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-box-icon">👥</div>
+        <div class="stat-box-number">{{ total_students_with_violations }}</div>
+        <div class="stat-box-label">Students with Violations</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">⚠️</div>
+        <div class="stat-box-number">{{ total_violations }}</div>
+        <div class="stat-box-label">Total Violations</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">🔴</div>
+        <div class="stat-box-number">{{ terminated_sessions }}</div>
+        <div class="stat-box-label">Terminated Sessions</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">📊</div>
+        <div class="stat-box-number">{{ avg_violations }}</div>
+        <div class="stat-box-label">Avg Violations/Student</div>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <select id="statusFilter" onchange="filterTable()">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="terminated">Terminated</option>
+    </select>
+    <select id="violationFilter" onchange="filterTable()">
+        <option value="">All Violations</option>
+        <option value="low">Low (1-2)</option>
+        <option value="medium">Medium (3-5)</option>
+        <option value="high">High (6-10)</option>
+        <option value="critical">Critical (10+)</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="🔍 Search by name, register number..." onkeyup="filterTable()">
+</div>
+
+<div class="violations-table">
+    <table id="violationsTable">
+        <thead>
+            <tr>
+                <th>Student Info</th>
+                <th>Session Status</th>
+                <th>Violations</th>
+                <th>Violation Reasons</th>
+                <th>Session Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr data-status="{{ session.status }}" data-violations="{{ session.violations }}">
+                <td>
+                    <div class="student-info">
+                        <span class="student-name">{{ session.student.name }}</span>
+                        <span class="student-regno">🪪 {{ session.student.register_no }}</span>
+                        <span class="student-contact">📧 {{ session.student.email }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-{{ session.status }}">
+                        {% if session.status == 'active' %}🟢 Active
+                        {% elif session.status == 'completed' %}✅ Completed
+                        {% else %}🔴 Terminated{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span class="violation-badge 
+                        {% if session.violations <= 2 %}violation-low
+                        {% elif session.violations <= 5 %}violation-medium
+                        {% elif session.violations <= 10 %}violation-high
+                        {% else %}violation-critical{% endif %}">
+                        ⚠️ {{ session.violations }} violation(s)
+                    </span>
+                </td>
+                <td>
+                    <div class="violation-reasons">
+                        {% if session.violation_reasons %}
+                            {{ session.violation_reasons|truncatewords:10 }}
+                        {% else %}
+                            <span style="color:#9ca3af">No violations recorded</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div style="font-size:.85rem">
+                        <strong>Started:</strong> {{ session.started_at|date:"M d, Y H:i" }}<br>
+                        {% if session.ended_at %}
+                        <strong>Ended:</strong> {{ session.ended_at|date:"M d, Y H:i" }}<br>
+                        <strong>Duration:</strong> {{ session.duration }}
+                        {% else %}
+                        <span style="color:#10b981">⏱️ In Progress</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-details" onclick="viewDetails({{ session.id }})">
+                        👁️ Details
+                    </button>
+                    <button class="btn btn-delete" onclick="clearViolations({{ session.id }}, '{{ session.student.name }}')">
+                        🗑️ Clear
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <div class="empty-state-text">No violations found</div>
+                        <p>All students are following exam rules properly</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Details Modal -->
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📋 Session Details</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="detailsContent"></div>
+    </div>
+</div>
+
+<script>
+const sessionsData = {{ sessions_json|safe }};
+
+function filterTable() {
+    const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+    const violationFilter = document.getElementById('violationFilter').value;
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.getElementById('violationsTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const status = row.getAttribute('data-status');
+        const violations = parseInt(row.getAttribute('data-violations'));
+        const text = row.textContent.toLowerCase();
+        
+        let showRow = true;
+        
+        // Status filter
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        // Violation level filter
+        if (violationFilter) {
+            if (violationFilter === 'low' && violations > 2) showRow = false;
+            if (violationFilter === 'medium' && (violations < 3 || violations > 5)) showRow = false;
+            if (violationFilter === 'high' && (violations < 6 || violations > 10)) showRow = false;
+            if (violationFilter === 'critical' && violations <= 10) showRow = false;
+        }
+        
+        // Search filter
+        if (searchInput && !text.includes(searchInput)) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    }
+}
+
+function viewDetails(sessionId) {
+    const session = sessionsData.find(s => s.id === sessionId);
+    if (!session) return;
+    
+    const violationLevel = session.violations <= 2 ? 'Low' : 
+                          session.violations <= 5 ? 'Medium' : 
+                          session.violations <= 10 ? 'High' : 'Critical';
+    
+    const violationColor = session.violations <= 2 ? '#fbbf24' : 
+                          session.violations <= 5 ? '#fb923c' : 
+                          session.violations <= 10 ? '#ef4444' : '#ec4899';
+    
+    const content = `
+        <div class="detail-section">
+            <span class="detail-label">👤 Student Name</span>
+            <div class="detail-value">${session.student_name}</div>
+        </div>
+        
+        <div class="detail-section">
+            <span class="detail-label">🪪 Register Number</span>
+            <div class="detail-value">${session.student_regno}</div>
+        </div>
+        
+        <div class="detail-section">
+            <span class="detail-label">📧 Email</span>
+            <div class="detail-value">${session.student_email}</div>
+        </div>
+        
+        <div class="detail-section">
+            <span class="detail-label">🏫 College</span>
+            <div class="detail-value">${session.student_college}</div>
+        </div>
+        
+        <div class="detail-section">
+            <span class="detail-label">📊 Session Status</span>
+            <div class="detail-value">
+                <span class="status-badge status-${session.status}">
+                    ${session.status === 'active' ? '🟢 Active' : 
+                      session.status === 'completed' ? '✅ Completed' : '🔴 Terminated'}
+                </span>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <span class="detail-label">⚠️ Total Violations</span>
+            <div class="detail-value">
+                <span style="font-size:2rem;font-weight:800;color:${violationColor}">${session.violations}</span>
+                <span style="color:#6b7280;margin-left:10px">(${violationLevel} Level)</span>
+            </div>
+        </div>
+        
+        ${session.violation_reasons ? `
+        <div class="detail-section">
+            <span class="detail-label">📝 Violation Details</span>
+            <div class="detail-value">${session.violation_reasons}</div>
+        </div>
+        ` : ''}
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-icon">🚀</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Session Started</div>
+                    <div class="timeline-text">${session.started_at}</div>
+                </div>
+            </div>
+            
+            ${session.ended_at ? `
+            <div class="timeline-item">
+                <div class="timeline-icon">${session.status === 'completed' ? '✅' : '🔴'}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Session ${session.status === 'completed' ? 'Completed' : 'Terminated'}</div>
+                    <div class="timeline-text">${session.ended_at}</div>
+                    <div class="timeline-time">Duration: ${session.duration}</div>
+                </div>
+            </div>
+            ` : `
+            <div class="timeline-item">
+                <div class="timeline-icon">⏱️</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Session In Progress</div>
+                    <div class="timeline-text" style="color:#10b981">Currently active</div>
+                </div>
+            </div>
+            `}
+        </div>
+    `;
+    
+    document.getElementById('detailsContent').innerHTML = content;
+    document.getElementById('detailsModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('detailsModal').style.display = 'none';
+}
+
+async function clearViolations(sessionId, studentName) {
+    if (!confirm(`Are you sure you want to clear all violations for ${studentName}?\n\nThis will reset the violation count to 0 and clear all violation reasons.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin-api/violations/${sessionId}/clear/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Violations cleared successfully!');
+            window.location.reload();
+        } else {
+            alert('❌ Error: ' + (result.error || 'Failed to clear violations'));
+        }
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

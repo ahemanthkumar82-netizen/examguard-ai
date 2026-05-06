@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 Online Exam Eye Detection System - Backend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 10px;
+        }
+        .post {
+            background: #28a745;
+            color: white;
+        }
+        .get {
+            background: #007bff;
+            color: white;
+        }
+        .url {
+            color: #495057;
+            font-family: 'Courier New', monospace;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .links {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Online Exam Eye Detection System</h1>
+        <p class="subtitle">Django Backend API Server</p>
+        
+        <div class="status">
+            ✅ Backend Server is Running Successfully!
+        </div>
+
+        <div class="section">
+            <h2>📡 API Endpoints</h2>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="url">/api/login/</span> - Student login
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="url">/api/violation/</span> - Log violation
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="url">/api/logout/</span> - End session
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="url">/api/session/</span> - Check active session
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="url">/api/sessions/</span> - Get all sessions
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Detection Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">👤</div>
+                    <div>Only One Person</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👁️</div>
+                    <div>Face Detection</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">😴</div>
+                    <div>Sleep Alert</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📦</div>
+                    <div>Box Boundary</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <div>Head Turn</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⏱️</div>
+                    <div>Time Tracking</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="/admin/" class="btn btn-primary">🔐 Admin Panel</a>
+            <a href="/api/" class="btn btn-success">📡 API Root</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ExamGuard - Login</title>
+<link rel="stylesheet" href="/static/darkmode.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes float3d{0%,100%{transform:translateY(0) rotateX(0deg) rotateY(0deg)}50%{transform:translateY(-20px) rotateX(5deg) rotateY(5deg)}}
+@keyframes rotate3d{0%{transform:rotateY(0deg) rotateX(0deg)}100%{transform:rotateY(360deg) rotateX(360deg)}}
+@keyframes slideIn3d{from{opacity:0;transform:translateZ(-100px) rotateY(-20deg)}to{opacity:1;transform:translateZ(0) rotateY(0)}}
+@keyframes pulse3d{0%,100%{transform:scale(1) translateZ(0)}50%{transform:scale(1.05) translateZ(20px)}}
+@keyframes wave{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes parallaxFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,#00d2ff,#3a7bd5,#00f2fe,#4facfe);background-size:400% 400%;animation:gradient 15s ease infinite;padding:1.5rem;position:relative;overflow:hidden;perspective:1500px}
+.parallax-bg{position:absolute;width:150%;height:150%;top:-25%;left:-25%;background:radial-gradient(circle at 30% 50%,rgba(0,210,255,.2),transparent 50%),radial-gradient(circle at 70% 50%,rgba(58,123,213,.2),transparent 50%);animation:parallaxFloat 25s ease-in-out infinite;z-index:0}
+.sphere{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.3),transparent);pointer-events:none;animation:float3d 6s ease-in-out infinite;will-change:transform;z-index:1}
+.sphere:nth-child(2){width:300px;height:300px;top:10%;left:10%;animation-delay:0s;opacity:.4}
+.sphere:nth-child(3){width:200px;height:200px;top:60%;right:15%;animation-delay:1s;opacity:.3}
+.sphere:nth-child(4){width:150px;height:150px;bottom:20%;left:50%;animation-delay:2s;opacity:.5}
+.cube{position:absolute;width:100px;height:100px;background:linear-gradient(135deg,rgba(102,126,234,.2),rgba(118,75,162,.2));border:2px solid rgba(255,255,255,.1);animation:rotate3d 20s linear infinite;top:20%;right:20%;transform-style:preserve-3d;will-change:transform;z-index:1}
+.card{background:rgba(255,255,255,.1);backdrop-filter:blur(30px);border-radius:30px;padding:3rem;width:100%;max-width:450px;box-shadow:0 30px 80px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.2);position:relative;z-index:10;animation:slideIn3d .8s ease-out;transform-style:preserve-3d;border:1px solid rgba(255,255,255,.2);transition:transform .1s ease;will-change:transform}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:100%;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);border-radius:30px;pointer-events:none}
+.card::after{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#00d2ff,#00f2fe,#4facfe,#00f2fe,#00d2ff);background-size:300% 300%;animation:gradient 8s ease infinite;border-radius:30px;z-index:-1;opacity:.5;filter:blur(10px)}
+.header{text-align:center;margin-bottom:2.5rem;transform:translateZ(50px)}
+.icon{font-size:4rem;margin-bottom:1rem;display:inline-block;animation:pulse3d 3s ease-in-out infinite;filter:drop-shadow(0 10px 20px rgba(0,0,0,.3))}
+h1{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#fff,#f0f0f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem;letter-spacing:-.02em;text-shadow:0 5px 15px rgba(0,0,0,.2)}
+.subtitle{color:rgba(255,255,255,.9);font-size:1.1rem;font-weight:500;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.warning{background:rgba(217,119,6,.9);border:1px solid rgba(245,158,11,.5);color:#fff;padding:1rem 1.2rem;border-radius:15px;margin-bottom:1.5rem;font-size:.9rem;display:none;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(217,119,6,.3);transform:translateZ(30px)}
+.error-box{background:rgba(220,38,38,.9);border:1px solid rgba(239,68,68,.5);color:#fff;padding:1rem 1.2rem;border-radius:15px;margin-bottom:1.5rem;font-size:.9rem;display:none;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(220,38,38,.3);transform:translateZ(30px)}
+.form{display:flex;flex-direction:column;gap:1.3rem}
+.field{display:flex;flex-direction:column;gap:.5rem;position:relative;transform-style:preserve-3d;transition:transform .3s ease}
+.field:hover{transform:translateZ(10px)}
+label{color:rgba(255,255,255,.95);font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-shadow:0 2px 5px rgba(0,0,0,.2)}
+input{padding:1rem 1.2rem;padding-right:3.5rem;border-radius:15px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:1rem;outline:0;transition:all .3s ease;backdrop-filter:blur(10px);box-shadow:inset 0 2px 10px rgba(0,0,0,.1)}
+input:focus{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.2);box-shadow:0 10px 30px rgba(102,126,234,.3),inset 0 2px 10px rgba(0,0,0,.1);transform:translateY(-3px) translateZ(20px)}
+input::placeholder{color:rgba(255,255,255,.6)}
+.password-wrapper{position:relative}
+.password-toggle{position:absolute;right:1rem;top:50%;background:rgba(255,255,255,.2);border:none;color:#fff;cursor:pointer;font-size:1.2rem;padding:.5rem;transition:all .3s ease;border-radius:10px;backdrop-filter:blur(10px);z-index:10;user-select:none}
+.password-toggle:hover{background:rgba(255,255,255,.3);transform:scale(1.1)}
+.btn{margin-top:1rem;padding:1.1rem;border-radius:15px;border:none;background:linear-gradient(135deg,#00d2ff,#3a7bd5);color:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;box-shadow:0 15px 40px rgba(0,210,255,.4);transform-style:preserve-3d}
+.btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s ease}
+.btn:hover{transform:translateY(-5px) translateZ(30px);box-shadow:0 20px 50px rgba(0,210,255,.6)}
+.btn:hover::before{left:100%}
+.btn:active{transform:translateY(-2px) translateZ(20px)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:rgba(255,255,255,.8);font-size:.9rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent)}
+.register-link{text-align:center}
+.register-link a{color:#fff;text-decoration:none;font-weight:700;font-size:1.05rem;transition:all .3s ease;display:inline-block;padding:.7rem 1.5rem;border-radius:12px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2)}
+.register-link a:hover{background:rgba(255,255,255,.2);transform:translateY(-3px) translateZ(20px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.wave-container{position:absolute;bottom:0;left:0;width:100%;height:150px;overflow:hidden;pointer-events:none;opacity:.3;z-index:1}
+.wave{position:absolute;bottom:0;left:0;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:wave 8s linear infinite;will-change:transform}
+@media (max-width:768px){body{padding:1rem;perspective:1000px}.card{padding:2rem;max-width:95%;margin:1rem;transform:none !important}.icon{font-size:3rem}h1{font-size:2rem}.subtitle{font-size:1rem}input{padding:0.9rem 1rem;padding-right:3.5rem;font-size:16px;-webkit-appearance:none}input:focus{transform:none;box-shadow:0 5px 15px rgba(0,210,255,0.3),inset 0 2px 10px rgba(0,0,0,0.1)}input:active{transform:none}.btn{padding:1rem;font-size:1rem;-webkit-tap-highlight-color:transparent}input:focus{transform:none}.btn:hover{transform:none;box-shadow:0 15px 40px rgba(0,210,255,0.4)}.btn:active{transform:scale(0.98)}.register-link{display:flex;flex-direction:column;gap:0.8rem}.register-link a{padding:0.8rem 1.2rem;font-size:0.95rem;width:100%;text-align:center;-webkit-tap-highlight-color:transparent}input:focus{transform:none}.register-link a:hover{transform:none;box-shadow:0 5px 15px rgba(0,0,0,0.2)}.register-link a:active{transform:scale(0.98)}.password-toggle{padding:0.6rem;font-size:1.1rem;-webkit-tap-highlight-color:transparent;right:0.8rem;transform:translateY(-50%) !important}.password-toggle:hover{transform:translateY(-50%) !important;background:rgba(255,255,255,0.3)}.password-toggle:active{transform:translateY(-50%) scale(0.95) !important}.field:hover{transform:none}.field{transform:none !important}.sphere,.cube,.parallax-bg{display:none}.form{gap:1.1rem}.field{gap:0.4rem}label{font-size:0.85rem}.card::before,.card::after{animation:none}}
+</style>
+</head>
+<body>
+<div class="parallax-bg"></div>
+<div class="sphere"></div>
+<div class="sphere"></div>
+<div class="sphere"></div>
+<div class="cube"></div>
+<div class="card" id="parallaxCard">
+<div class="header">
+<div class="icon">🔐</div>
+<h1>ExamGuard</h1>
+<p class="subtitle">Welcome Back! Login to Continue</p>
+</div>
+
+<div class="warning" id="warningBox"></div>
+<div class="error-box" id="errorBox"></div>
+
+<form class="form" id="loginForm">
+<div class="field">
+<label>🪪 Register Number</label>
+<input type="text" id="regno" placeholder="Enter your register number" required/>
+</div>
+<div class="field">
+<label>🔑 Password</label>
+<div class="password-wrapper">
+<input type="password" id="password" placeholder="Enter your password" required/>
+<button type="button" class="password-toggle" id="togglePassword">👁️</button>
+</div>
+</div>
+<button class="btn" type="submit" id="submitBtn">🚀 Login to Exam</button>
+</form>
+
+<div class="divider">OR</div>
+
+<div class="register-link">
+<a href="/forgot-password/">🔒 Forgot Password?</a>
+<a href="/register/">✨ New User? Register Here</a>
+</div>
+</div>
+
+<div class="wave-container">
+<div class="wave"></div>
+</div>
+
+<script>
+// Disable parallax on mobile
+const isMobile = window.innerWidth <= 768;
+
+if (!isMobile) {
+    // Parallax mouse movement effect (desktop only)
+    const card = document.getElementById('parallaxCard');
+    const body = document.body;
+
+    body.addEventListener('mousemove', (e) => {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    });
+
+    body.addEventListener('mouseleave', () => {
+        card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+}
+
+const params=new URLSearchParams(window.location.search);
+const reason=params.get('reason');
+if(reason){
+const reasons={
+face:'⚠️ Face not detected',
+multiple:'⚠️ Multiple persons detected',
+sleep:'⚠️ Sleep/drowsiness detected',
+lookdown:'⚠️ Looked down >2 seconds',
+outofbox:'⚠️ Face outside detection box',
+headturn:'⚠️ Head turned outside camera',
+blocked:'⚠️ Camera blocked or hidden',
+gaze_away:'⚠️ Looking away from screen'
+};
+document.getElementById('warningBox').textContent=reasons[reason]||'⚠️ Rule violation';
+document.getElementById('warningBox').style.display='block';
+}
+
+// Password toggle functionality
+const togglePasswordBtn = document.getElementById('togglePassword');
+const passwordField = document.getElementById('password');
+
+togglePasswordBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const currentType = passwordField.getAttribute('type');
+    const newType = currentType === 'password' ? 'text' : 'password';
+    
+    passwordField.setAttribute('type', newType);
+    this.textContent = newType === 'password' ? '👁️' : '🙈';
+    
+    // Position button correctly
+    this.style.transform = 'translateY(-50%)';
+});
+
+// Ensure button stays positioned correctly
+passwordField.addEventListener('focus', function() {
+    togglePasswordBtn.style.transform = 'translateY(-50%)';
+});
+
+passwordField.addEventListener('blur', function() {
+    togglePasswordBtn.style.transform = 'translateY(-50%)';
+});
+
+document.getElementById('loginForm').addEventListener('submit',async function(e){
+e.preventDefault();
+const btn=document.getElementById('submitBtn');
+const errorBox=document.getElementById('errorBox');
+errorBox.style.display='none';
+
+btn.disabled=true;
+btn.textContent='⏳ Logging in...';
+
+const formData={
+regno:document.getElementById('regno').value.trim(),
+password:document.getElementById('password').value
+};
+
+try{
+const res=await fetch('/login/',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(formData)
+});
+const data=await res.json();
+if(data.success){
+window.location.href='/exam/';
+}else{
+errorBox.textContent='❌ '+(data.error||'Invalid credentials');
+errorBox.style.display='block';
+btn.disabled=false;
+btn.textContent='🚀 Login to Exam';
+}
+}catch(err){
+errorBox.textContent='❌ Server error. Please make sure the server is running.';
+errorBox.style.display='block';
+btn.disabled=false;
+btn.textContent='🚀 Login to Exam';
+}
+});
+</script>
+<script src="/static/darkmode.js"></script>
+</body>
+</html>

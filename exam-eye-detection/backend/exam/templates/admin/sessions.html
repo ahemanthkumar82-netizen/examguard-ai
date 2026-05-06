@@ -1,0 +1,359 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+#content-main{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;border-radius:15px;margin:20px 0;animation:fadeIn .6s ease-out}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;animation:slideIn .6s ease-out .1s both}
+.page-header h1{color:#fff;font-size:2rem;margin:0;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+.header-actions{display:flex;gap:10px}
+.add-btn{background:#10b981;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;transition:all .3s ease;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(16,185,129,.3)}
+.add-btn:hover{background:#059669;transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.4);text-decoration:none;color:#fff}
+.back-btn{background:#6b7280;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;transition:all .3s ease;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(107,114,128,.3)}
+.back-btn:hover{background:#4b5563;transform:translateY(-2px);box-shadow:0 6px 20px rgba(107,114,128,.4);text-decoration:none;color:#fff}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px;animation:fadeIn .6s ease-out .2s both}
+.stat-box{background:#fff;padding:20px;border-radius:12px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+.stat-box-icon{font-size:2.5rem;margin-bottom:10px}
+.stat-box-number{font-size:2rem;font-weight:800;color:#667eea;margin-bottom:5px}
+.stat-box-label{color:#6b7280;font-size:.9rem;font-weight:600;text-transform:uppercase}
+.filter-bar{background:#fff;padding:15px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.1);animation:fadeIn .6s ease-out .3s both;display:flex;gap:15px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:10px 15px;border:2px solid #e5e7eb;border-radius:10px;font-size:.95rem;outline:0;transition:all .3s ease}
+.filter-bar select:focus,.filter-bar input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+.filter-bar select{flex:1;min-width:150px}
+.filter-bar input{flex:2;min-width:250px}
+.sessions-table{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:fadeIn .6s ease-out .4s both}
+table{width:100%;border-collapse:collapse}
+thead{background:linear-gradient(135deg,#667eea,#764ba2)}
+thead th{color:#fff;padding:18px 15px;text-align:left;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.5px}
+tbody tr{border-bottom:1px solid #e5e7eb;transition:all .3s ease}
+tbody tr:hover{background:#f9fafb}
+tbody td{padding:15px;color:#374151;font-size:.95rem}
+.student-info{display:flex;flex-direction:column;gap:5px}
+.student-name{font-weight:700;color:#1f2937;font-size:1rem}
+.student-regno{color:#6b7280;font-size:.85rem}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-weight:700;font-size:.85rem}
+.status-active{background:#d1fae5;color:#065f46;border:1px solid #10b981}
+.status-completed{background:#dbeafe;color:#1e40af;border:1px solid #3b82f6}
+.status-terminated{background:#fee2e2;color:#991b1b;border:1px solid #ef4444}
+.action-btns{display:flex;gap:8px}
+.btn{padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem;transition:all .3s ease;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.btn-edit{background:#f59e0b;color:#fff}
+.btn-edit:hover{background:#d97706;transform:translateY(-2px);box-shadow:0 4px 12px rgba(245,158,11,.3);text-decoration:none;color:#fff}
+.btn-delete{background:#ef4444;color:#fff}
+.btn-delete:hover{background:#dc2626;transform:translateY(-2px);box-shadow:0 4px 12px rgba(239,68,68,.3)}
+.empty-state{text-align:center;padding:60px 20px;color:#6b7280}
+.empty-state-icon{font-size:4rem;margin-bottom:20px;opacity:.5}
+.empty-state-text{font-size:1.2rem;font-weight:600;margin-bottom:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;animation:fadeIn .3s ease-out}
+.modal-content{background:#fff;border-radius:20px;padding:30px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideIn .4s ease-out}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h2{margin:0;color:#1f2937;font-size:1.5rem}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6b7280;transition:all .3s ease;padding:5px 10px;border-radius:8px}
+.modal-close:hover{background:#f3f4f6;color:#1f2937}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;margin-bottom:8px;color:#374151;font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group select{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:1rem;outline:0;transition:all .3s ease}
+.form-group input:focus,.form-group select:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:25px}
+.btn-cancel{background:#6b7280;color:#fff}
+.btn-cancel:hover{background:#4b5563}
+.btn-save{background:#10b981;color:#fff}
+.btn-save:hover{background:#059669}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📝 Exam Sessions Management</h1>
+    <div class="header-actions">
+        <a href="#" class="add-btn" onclick="openAddModal(); return false;">
+            <span>➕</span> Add New Session
+        </a>
+        <a href="/admin/" class="back-btn">
+            <span>🔙</span> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-box-icon">📊</div>
+        <div class="stat-box-number">{{ total_sessions }}</div>
+        <div class="stat-box-label">Total Sessions</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">🟢</div>
+        <div class="stat-box-number">{{ active_sessions }}</div>
+        <div class="stat-box-label">Active Sessions</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">✅</div>
+        <div class="stat-box-number">{{ completed_sessions }}</div>
+        <div class="stat-box-label">Completed</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-icon">🔴</div>
+        <div class="stat-box-number">{{ terminated_sessions }}</div>
+        <div class="stat-box-label">Terminated</div>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <select id="statusFilter" onchange="filterTable()">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="terminated">Terminated</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="🔍 Search by student name or register number..." onkeyup="filterTable()">
+</div>
+
+<div class="sessions-table">
+    <table id="sessionsTable">
+        <thead>
+            <tr>
+                <th>Student Info</th>
+                <th>Status</th>
+                <th>Violations</th>
+                <th>Started At</th>
+                <th>Ended At</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr data-status="{{ session.status }}">
+                <td>
+                    <div class="student-info">
+                        <span class="student-name">{{ session.student.name }}</span>
+                        <span class="student-regno">🪪 {{ session.student.register_no }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-{{ session.status }}">
+                        {% if session.status == 'active' %}🟢 Active
+                        {% elif session.status == 'completed' %}✅ Completed
+                        {% else %}🔴 Terminated{% endif %}
+                    </span>
+                </td>
+                <td>⚠️ {{ session.violations }}</td>
+                <td>{{ session.started_at|date:"M d, Y H:i" }}</td>
+                <td>
+                    {% if session.ended_at %}
+                        {{ session.ended_at|date:"M d, Y H:i" }}
+                    {% else %}
+                        <span style="color:#10b981">⏱️ In Progress</span>
+                    {% endif %}
+                </td>
+                <td>{{ session.duration }}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn btn-edit" onclick="editSession({{ session.id }})">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-delete" onclick="deleteSession({{ session.id }}, '{{ session.student.name }}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div class="empty-state-text">No exam sessions found</div>
+                        <p>Add your first exam session to get started</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal" id="sessionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add New Session</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="sessionForm" onsubmit="saveSession(event)">
+            <input type="hidden" id="sessionId">
+            <div class="form-group">
+                <label>👤 Select Student</label>
+                <select id="studentId" required>
+                    <option value="">Choose a student...</option>
+                    {% for student in all_students %}
+                    <option value="{{ student.id }}">{{ student.name }} ({{ student.register_no }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📊 Status</label>
+                <select id="sessionStatus" required>
+                    <option value="active">🟢 Active</option>
+                    <option value="completed">✅ Completed</option>
+                    <option value="terminated">🔴 Terminated</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>⚠️ Violations</label>
+                <input type="number" id="violations" min="0" value="0" required>
+            </div>
+            <div class="form-group">
+                <label>📝 Violation Reasons (Optional)</label>
+                <input type="text" id="violationReasons" placeholder="e.g., face, multiple, sleep">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-save">💾 Save Session</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const sessionsData = {{ sessions_json|safe }};
+
+function filterTable() {
+    const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.getElementById('sessionsTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const status = row.getAttribute('data-status');
+        const text = row.textContent.toLowerCase();
+        
+        let showRow = true;
+        
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        if (searchInput && !text.includes(searchInput)) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    }
+}
+
+// Check URL for status filter
+window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    if (status) {
+        document.getElementById('statusFilter').value = status;
+        filterTable();
+    }
+});
+
+function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'Add New Session';
+    document.getElementById('sessionForm').reset();
+    document.getElementById('sessionId').value = '';
+    document.getElementById('sessionModal').style.display = 'flex';
+}
+
+function editSession(id) {
+    const session = sessionsData.find(s => s.id === id);
+    if (!session) return;
+    
+    document.getElementById('modalTitle').textContent = 'Edit Session';
+    document.getElementById('sessionId').value = session.id;
+    document.getElementById('studentId').value = session.student_id;
+    document.getElementById('sessionStatus').value = session.status;
+    document.getElementById('violations').value = session.violations;
+    document.getElementById('violationReasons').value = session.violation_reasons || '';
+    document.getElementById('sessionModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('sessionModal').style.display = 'none';
+}
+
+async function saveSession(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('sessionId').value;
+    const data = {
+        student_id: document.getElementById('studentId').value,
+        status: document.getElementById('sessionStatus').value,
+        violations: document.getElementById('violations').value,
+        violation_reasons: document.getElementById('violationReasons').value
+    };
+    
+    const url = id ? `/admin-api/sessions/${id}/update/` : '/admin-api/sessions/create/';
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert('❌ Error: ' + (result.error || 'Failed to save session'));
+        }
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    }
+}
+
+async function deleteSession(id, studentName) {
+    if (!confirm(`Are you sure you want to delete this exam session for ${studentName}?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin-api/sessions/${id}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert('❌ Error: ' + (result.error || 'Failed to delete session'));
+        }
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
