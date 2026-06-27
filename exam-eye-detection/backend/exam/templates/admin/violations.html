@@ -180,7 +180,7 @@ tbody td{padding:15px;color:#374151;font-size:.95rem}
                     <button class="btn btn-details" onclick="viewDetails({{ session.id }})">
                         👁️ Details
                     </button>
-                    <button class="btn btn-delete" onclick="clearViolations({{ session.id }}, '{{ session.student.name }}')">
+                    <button class="btn btn-delete" onclick="clearViolations({{ session.id }}, '{{ session.student.name|escapejs }}')">
                         🗑️ Clear
                     </button>
                 </td>
@@ -251,6 +251,12 @@ function filterTable() {
     }
 }
 
+function escapeHtml(str){
+const d=document.createElement('div');
+d.appendChild(document.createTextNode(str==null?'':String(str)));
+return d.innerHTML;
+}
+
 function viewDetails(sessionId) {
     const session = sessionsData.find(s => s.id === sessionId);
     if (!session) return;
@@ -266,76 +272,65 @@ function viewDetails(sessionId) {
     const content = `
         <div class="detail-section">
             <span class="detail-label">👤 Student Name</span>
-            <div class="detail-value">${session.student_name}</div>
+            <div class="detail-value">${escapeHtml(session.student_name)}</div>
         </div>
-        
         <div class="detail-section">
             <span class="detail-label">🪪 Register Number</span>
-            <div class="detail-value">${session.student_regno}</div>
+            <div class="detail-value">${escapeHtml(session.student_regno)}</div>
         </div>
-        
         <div class="detail-section">
             <span class="detail-label">📧 Email</span>
-            <div class="detail-value">${session.student_email}</div>
+            <div class="detail-value">${escapeHtml(session.student_email)}</div>
         </div>
-        
         <div class="detail-section">
             <span class="detail-label">🏫 College</span>
-            <div class="detail-value">${session.student_college}</div>
+            <div class="detail-value">${escapeHtml(session.student_college)}</div>
         </div>
-        
         <div class="detail-section">
             <span class="detail-label">📊 Session Status</span>
             <div class="detail-value">
-                <span class="status-badge status-${session.status}">
-                    ${session.status === 'active' ? '🟢 Active' : 
+                <span class="status-badge status-${escapeHtml(session.status)}">
+                    ${session.status === 'active' ? '🟢 Active' :
                       session.status === 'completed' ? '✅ Completed' : '🔴 Terminated'}
                 </span>
             </div>
         </div>
-        
         <div class="detail-section">
             <span class="detail-label">⚠️ Total Violations</span>
             <div class="detail-value">
-                <span style="font-size:2rem;font-weight:800;color:${violationColor}">${session.violations}</span>
-                <span style="color:#6b7280;margin-left:10px">(${violationLevel} Level)</span>
+                <span style="font-size:2rem;font-weight:800;color:${escapeHtml(violationColor)}">${escapeHtml(String(session.violations))}</span>
+                <span style="color:#6b7280;margin-left:10px">(${escapeHtml(violationLevel)} Level)</span>
             </div>
         </div>
-        
         ${session.violation_reasons ? `
         <div class="detail-section">
             <span class="detail-label">📝 Violation Details</span>
-            <div class="detail-value">${session.violation_reasons}</div>
-        </div>
-        ` : ''}
-        
+            <div class="detail-value">${escapeHtml(session.violation_reasons)}</div>
+        </div>` : ''}
         <div class="timeline">
             <div class="timeline-item">
                 <div class="timeline-icon">🚀</div>
                 <div class="timeline-content">
                     <div class="timeline-title">Session Started</div>
-                    <div class="timeline-text">${session.started_at}</div>
+                    <div class="timeline-text">${escapeHtml(session.started_at)}</div>
                 </div>
             </div>
-            
             ${session.ended_at ? `
             <div class="timeline-item">
                 <div class="timeline-icon">${session.status === 'completed' ? '✅' : '🔴'}</div>
                 <div class="timeline-content">
                     <div class="timeline-title">Session ${session.status === 'completed' ? 'Completed' : 'Terminated'}</div>
-                    <div class="timeline-text">${session.ended_at}</div>
-                    <div class="timeline-time">Duration: ${session.duration}</div>
+                    <div class="timeline-text">${escapeHtml(session.ended_at)}</div>
+                    <div class="timeline-time">Duration: ${escapeHtml(session.duration)}</div>
                 </div>
-            </div>
-            ` : `
+            </div>` : `
             <div class="timeline-item">
                 <div class="timeline-icon">⏱️</div>
                 <div class="timeline-content">
                     <div class="timeline-title">Session In Progress</div>
                     <div class="timeline-text" style="color:#10b981">Currently active</div>
                 </div>
-            </div>
-            `}
+            </div>`}
         </div>
     `;
     
@@ -348,7 +343,7 @@ function closeModal() {
 }
 
 async function clearViolations(sessionId, studentName) {
-    if (!confirm(`Are you sure you want to clear all violations for ${studentName}?\n\nThis will reset the violation count to 0 and clear all violation reasons.`)) {
+    if (!confirm('Are you sure you want to clear all violations for ' + studentName + '?\n\nThis will reset the violation count to 0 and clear all violation reasons.')) {
         return;
     }
     

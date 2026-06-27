@@ -4,10 +4,12 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('register/', views.register_page, name='register'),
+    path('login/', views.login_page, name='login_page'),
+    path('register/', views.register_page, name='register_page'),
+    path('auth/', views.auth_page, name='auth_page'),
     path('exam/', views.exam_page, name='exam'),
-    path('login/', views.student_login, name='login'),
-    path('signup/', views.student_signup, name='signup'),
+    path('api/login/', views.student_login, name='login'),
+    path('api/signup/', views.student_signup, name='signup'),
     path('violation/', views.log_violation, name='violation'),
     path('logout/', views.logout_view, name='logout'),
     path('test/', TemplateView.as_view(template_name='test.html'), name='test'),
@@ -18,8 +20,8 @@ urlpatterns = [
     # Password Reset
     path('forgot-password/', views.forgot_password_page, name='forgot_password_page'),
     path('forgot-password/send/', views.forgot_password, name='forgot_password'),
-    path('reset-password/<str:token>/', views.reset_password_page, name='reset_password_page'),
     path('reset-password/submit/', views.reset_password, name='reset_password'),
+    path('reset-password/<str:token>/', views.reset_password_page, name='reset_password_page'),
     
     # Student Dashboard
     path('dashboard/', views.student_dashboard, name='student_dashboard'),

@@ -160,7 +160,8 @@ In Progress
 
 <script>
 async function logout(){
-await fetch('/logout/',{method:'POST',headers:{'Content-Type':'application/json'}}).catch(()=>{});
+const csrfToken=document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||'';
+await fetch('/logout/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken}}).catch(()=>{});
 window.location.href='/';
 }
 </script>

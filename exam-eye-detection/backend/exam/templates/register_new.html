@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ExamGuard - Register</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;background:#070018;color:#fff;overflow-x:hidden;position:relative;display:flex;align-items:center;justify-content:center;padding:2rem}
+body::before{content:'';position:absolute;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(168,85,247,.15),transparent 50%),radial-gradient(circle at 80% 50%,rgba(236,72,153,.15),transparent 50%);animation:gradient 15s ease infinite;pointer-events:none}
+.container{background:rgba(15,15,35,.8);backdrop-filter:blur(20px);border-radius:30px;padding:3rem;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.3);position:relative;z-index:1}
+.container::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#a855f7,#ec4899,#a855f7);border-radius:30px;z-index:-1;opacity:.3;filter:blur(10px)}
+.header{text-align:center;margin-bottom:2.5rem}
+.icon{font-size:4rem;margin-bottom:1rem;animation:float 3s ease-in-out infinite}
+.header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
+.header p{color:#9ca3af;font-size:1rem}
+.error-box{background:rgba(220,38,38,.2);border:1px solid rgba(239,68,68,.5);color:#fca5a5;padding:.9rem 1rem;border-radius:10px;margin-bottom:1.2rem;font-size:.88rem;display:none}
+.success-box{background:rgba(5,150,105,.2);border:1px solid rgba(16,185,129,.5);color:#6ee7b7;padding:.9rem 1rem;border-radius:10px;margin-bottom:1.2rem;font-size:.88rem;display:none}
+.input-group{margin-bottom:1.3rem}
+.input-group label{display:block;color:#d1d5db;font-size:.85rem;font-weight:600;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.input-wrapper{position:relative}
+.input-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:1.1rem;color:#a855f7}
+.input-wrapper input{width:100%;padding:.9rem 1rem .9rem 3rem;background:rgba(15,15,35,.9);border:2px solid rgba(168,85,247,.3);border-radius:12px;color:#fff;font-size:.9rem;outline:0;transition:all .3s ease}
+.input-wrapper input:focus{border-color:#a855f7;box-shadow:0 0 20px rgba(168,85,247,.3);background:rgba(15,15,35,1)}
+.input-wrapper input::placeholder{color:#6b7280}
+.password-toggle{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.1rem;padding:5px;transition:color .3s}
+.password-toggle:hover{color:#a855f7}
+.password-strength{margin-top:.5rem;font-size:.8rem;color:#9ca3af}
+.strength-bar{height:4px;background:rgba(168,85,247,.2);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.strength-fill{height:100%;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981);transition:width .3s ease}
+.btn{width:100%;padding:1.1rem;background:linear-gradient(135deg,#a855f7,#ec4899);border:none;border-radius:12px;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(168,85,247,.4);margin-top:1rem}
+.btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .5s ease}
+.btn:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(168,85,247,.6)}
+.btn:hover::before{left:100%}
+.btn:active{transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:#6b7280;font-size:.85rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(168,85,247,.3),transparent)}
+.login-link{text-align:center;color:#9ca3af;font-size:.9rem}
+.login-link a{color:#a855f7;text-decoration:none;font-weight:600;transition:color .3s}
+.login-link a:hover{color:#ec4899}
+.terms{margin-top:1rem;text-align:center;font-size:.8rem;color:#6b7280}
+.terms a{color:#a855f7;text-decoration:none}
+.terms a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="header">
+<div class="icon">📝</div>
+<h1>Create Account</h1>
+<p>Join ExamGuard and start your exam</p>
+</div>
+
+<div class="error-box" id="errorBox"></div>
+<div class="success-box" id="successBox"></div>
+
+<form id="registerForm">
+<div class="input-group">
+<label>Full Name</label>
+<div class="input-wrapper">
+<span class="input-icon">👤</span>
+<input type="text" id="name" placeholder="Enter your full name" required autofocus/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Phone Number</label>
+<div class="input-wrapper">
+<span class="input-icon">📱</span>
+<input type="tel" id="phone" pattern="[0-9]{10}" placeholder="10-digit mobile number" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Email Address</label>
+<div class="input-wrapper">
+<span class="input-icon">📧</span>
+<input type="email" id="email" placeholder="your.email@example.com" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>College Name</label>
+<div class="input-wrapper">
+<span class="input-icon">🏫</span>
+<input type="text" id="college" placeholder="Your college/university" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Register Number</label>
+<div class="input-wrapper">
+<span class="input-icon">🪪</span>
+<input type="text" id="regno" placeholder="Your unique register number" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔑</span>
+<input type="password" id="password" placeholder="Create a strong password" required minlength="8"/>
+<button type="button" class="password-toggle" id="togglePassword">👁️</button>
+</div>
+<div class="password-strength">
+<span id="strengthText">Password strength: Weak</span>
+<div class="strength-bar">
+<div class="strength-fill" id="strengthFill"></div>
+</div>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input type="password" id="confirmPassword" placeholder="Re-enter your password" required minlength="8"/>
+<button type="button" class="password-toggle" id="toggleConfirmPassword">👁️</button>
+</div>
+</div>
+
+<button class="btn" type="submit" id="submitBtn">✅ Create Account & Start Exam</button>
+</form>
+
+<div class="terms">
+By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+</div>
+
+<div class="divider">OR</div>
+
+<div class="login-link">
+Already have an account? <a href="/login/">Login Here</a>
+</div>
+</div>
+
+<script>
+// Password toggles
+document.getElementById('togglePassword').addEventListener('click',function(){
+const passwordField=document.getElementById('password');
+const type=passwordField.getAttribute('type')==='password'?'text':'password';
+passwordField.setAttribute('type',type);
+this.textContent=type==='password'?'👁️':'🙈';
+});
+
+document.getElementById('toggleConfirmPassword').addEventListener('click',function(){
+const passwordField=document.getElementById('confirmPassword');
+const type=passwordField.getAttribute('type')==='password'?'text':'password';
+passwordField.setAttribute('type',type);
+this.textContent=type==='password'?'👁️':'🙈';
+});
+
+// Password strength checker
+document.getElementById('password').addEventListener('input',function(){
+const password=this.value;
+const strengthText=document.getElementById('strengthText');
+const strengthFill=document.getElementById('strengthFill');
+
+let strength=0;
+if(password.length>=8)strength++;
+if(password.length>=12)strength++;
+if(/[a-z]/.test(password)&&/[A-Z]/.test(password))strength++;
+if(/[0-9]/.test(password))strength++;
+if(/[^a-zA-Z0-9]/.test(password))strength++;
+
+const percentage=(strength/5)*100;
+strengthFill.style.width=percentage+'%';
+
+if(strength<=1){
+strengthText.textContent='Password strength: Weak';
+strengthText.style.color='#ef4444';
+}else if(strength<=3){
+strengthText.textContent='Password strength: Medium';
+strengthText.style.color='#f59e0b';
+}else{
+strengthText.textContent='Password strength: Strong';
+strengthText.style.color='#10b981';
+}
+});
+
+// Register form
+document.getElementById('registerForm').addEventListener('submit',async function(e){
+e.preventDefault();
+const errorBox=document.getElementById('errorBox');
+const successBox=document.getElementById('successBox');
+const submitBtn=document.getElementById('submitBtn');
+errorBox.style.display='none';
+successBox.style.display='none';
+
+const password=document.getElementById('password').value;
+const confirmPassword=document.getElementById('confirmPassword').value;
+
+// Validate password match
+if(password!==confirmPassword){
+errorBox.textContent='❌ Passwords do not match!';
+errorBox.style.display='block';
+return;
+}
+
+// Validate password length
+if(password.length<8){
+errorBox.textContent='❌ Password must be at least 8 characters long!';
+errorBox.style.display='block';
+return;
+}
+
+const formData={
+name:document.getElementById('name').value.trim(),
+phone:document.getElementById('phone').value.trim(),
+email:document.getElementById('email').value.trim(),
+college:document.getElementById('college').value.trim(),
+regno:document.getElementById('regno').value.trim(),
+password:password
+};
+
+// Disable button
+submitBtn.disabled=true;
+submitBtn.textContent='⏳ Creating Account...';
+
+try{
+const csrfToken=document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||'';
+const res=await fetch('/api/signup/',{
+method:'POST',
+headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},
+body:JSON.stringify(formData)
+});
+const data=await res.json();
+if(data.success){
+successBox.textContent='✅ Account created successfully! Redirecting to exam...';
+successBox.style.display='block';
+setTimeout(()=>{
+window.location.href='/exam/';
+},2000);
+}else{
+errorBox.textContent='❌ '+(data.error||'Registration failed');
+errorBox.style.display='block';
+submitBtn.disabled=false;
+submitBtn.textContent='✅ Create Account & Start Exam';
+}
+}catch(err){
+errorBox.textContent='❌ Server error. Please try again.';
+errorBox.style.display='block';
+submitBtn.disabled=false;
+submitBtn.textContent='✅ Create Account & Start Exam';
+}
+});
+
+// Phone number validation
+document.getElementById('phone').addEventListener('input',function(){
+this.value=this.value.replace(/[^0-9]/g,'').slice(0,10);
+});
+</script>
+</body>
+</html>

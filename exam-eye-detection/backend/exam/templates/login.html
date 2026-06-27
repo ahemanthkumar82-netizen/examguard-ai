@@ -132,8 +132,11 @@ headturn:'⚠️ Head turned outside camera',
 blocked:'⚠️ Camera blocked or hidden',
 gaze_away:'⚠️ Looking away from screen'
 };
-document.getElementById('warningBox').textContent=reasons[reason]||'⚠️ Rule violation';
+const safeMessage=reasons[reason];
+if(safeMessage){
+document.getElementById('warningBox').textContent=safeMessage;
 document.getElementById('warningBox').style.display='block';
+}
 }
 
 // Password toggle functionality
@@ -178,9 +181,10 @@ password:document.getElementById('password').value
 };
 
 try{
-const res=await fetch('/login/',{
+const csrfToken=document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||'';
+const res=await fetch('/api/login/',{
 method:'POST',
-headers:{'Content-Type':'application/json'},
+headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},
 body:JSON.stringify(formData)
 });
 const data=await res.json();

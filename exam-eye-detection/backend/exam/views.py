@@ -10,12 +10,20 @@ import json
 from .models import Student, ExamSession, ViolationScreenshot
 
 def index(request):
-    """Login page with regno and password"""
-    return render(request, 'login.html')
+    """Redirect to login page"""
+    return redirect('login_page')
+
+def login_page(request):
+    """Modern login page"""
+    return render(request, 'login_new.html')
 
 def register_page(request):
-    """Registration page for new students"""
-    return render(request, 'register.html')
+    """Modern registration page"""
+    return render(request, 'register_new.html')
+
+def auth_page(request):
+    """Legacy split-screen auth page"""
+    return render(request, 'auth.html')
 
 def exam_page(request):
     """Exam monitoring page - Only accessible by logged-in student"""
@@ -25,13 +33,11 @@ def exam_page(request):
     
     try:
         student = Student.objects.get(id=student_id)
-        # Only return the logged-in student's data
         return render(request, 'exam.html', {'student': student})
-    except:
+    except Student.DoesNotExist:
         request.session.flush()
         return redirect('index')
 
-@csrf_exempt
 def student_login(request):
     """Handle student login with regno and password"""
     if request.method == 'POST':
@@ -66,7 +72,6 @@ def student_login(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
-@csrf_exempt
 def student_signup(request):
     """Handle student signup"""
     if request.method == 'POST':
@@ -676,9 +681,13 @@ def save_screenshot(request):
             
             session = ExamSession.objects.get(id=session_id, student_id=student_id)
             
+            screenshot_data = data.get('screenshot', '')
+            if len(screenshot_data) > 2 * 1024 * 1024:  # 2MB limit
+                return JsonResponse({'success': False, 'error': 'Screenshot too large'}, status=400)
+            
             screenshot = ViolationScreenshot.objects.create(
                 session=session,
-                screenshot=data.get('screenshot'),
+                screenshot=screenshot_data,
                 violation_type=data.get('violation_type')
             )
             

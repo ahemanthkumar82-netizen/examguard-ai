@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ExamGuard - Authentication</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(168,85,247,.4)}50%{box-shadow:0 0 40px rgba(168,85,247,.8)}}
+@keyframes particle{0%{transform:translateY(0) translateX(0);opacity:0}50%{opacity:1}100%{transform:translateY(-100vh) translateX(50px);opacity:0}}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;background:#070018;color:#fff;overflow-x:hidden;position:relative}
+body::before{content:'';position:absolute;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(168,85,247,.15),transparent 50%),radial-gradient(circle at 80% 50%,rgba(236,72,153,.15),transparent 50%);animation:gradient 15s ease infinite;pointer-events:none}
+.particle{position:absolute;width:4px;height:4px;background:rgba(168,85,247,.6);border-radius:50%;pointer-events:none;animation:particle 15s linear infinite}
+.particle:nth-child(1){left:10%;animation-delay:0s}
+.particle:nth-child(2){left:30%;animation-delay:3s}
+.particle:nth-child(3){left:50%;animation-delay:6s}
+.particle:nth-child(4){left:70%;animation-delay:9s}
+.particle:nth-child(5){left:90%;animation-delay:12s}
+.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;position:relative;z-index:1}
+.auth-wrapper{display:grid;grid-template-columns:1fr auto 1fr;gap:0;max-width:1400px;width:100%;position:relative}
+.form-panel{background:rgba(15,15,35,.7);backdrop-filter:blur(20px);border-radius:30px;padding:3rem;border:1px solid rgba(168,85,247,.3);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(168,85,247,.2);position:relative;overflow:hidden}
+.form-panel::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#a855f7,#ec4899,#a855f7);border-radius:30px;z-index:-1;opacity:.3;filter:blur(10px)}
+.center-icon{display:flex;align-items:center;justify-content:center;padding:0 2rem}
+.icon-circle{width:120px;height:120px;background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3rem;box-shadow:0 0 60px rgba(168,85,247,.6);animation:glow 3s ease-in-out infinite;position:relative}
+.icon-circle::before{content:'';position:absolute;width:140px;height:140px;border:2px solid rgba(168,85,247,.3);border-radius:50%;animation:glow 3s ease-in-out infinite reverse}
+.form-header{text-align:center;margin-bottom:2.5rem}
+.form-header h2{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
+.form-header p{color:#9ca3af;font-size:.95rem}
+.input-group{margin-bottom:1.5rem;position:relative}
+.input-group label{display:block;color:#d1d5db;font-size:.9rem;font-weight:600;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.input-wrapper{position:relative}
+.input-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:1.2rem;color:#a855f7}
+.input-wrapper input{width:100%;padding:.9rem 1rem .9rem 3rem;background:rgba(15,15,35,.8);border:2px solid rgba(168,85,247,.3);border-radius:12px;color:#fff;font-size:.95rem;outline:0;transition:all .3s ease}
+.input-wrapper input:focus{border-color:#a855f7;box-shadow:0 0 20px rgba(168,85,247,.3);background:rgba(15,15,35,.95)}
+.input-wrapper input::placeholder{color:#6b7280}
+.checkbox-group{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
+.checkbox-group input[type="checkbox"]{width:18px;height:18px;accent-color:#a855f7;cursor:pointer}
+.checkbox-group label{color:#9ca3af;font-size:.85rem;cursor:pointer;margin:0}
+.forgot-link{display:block;text-align:right;color:#a855f7;font-size:.85rem;text-decoration:none;margin-bottom:1.5rem;transition:all .3s ease}
+.forgot-link:hover{color:#ec4899}
+.btn{width:100%;padding:1rem;background:linear-gradient(135deg,#a855f7,#ec4899);border:none;border-radius:12px;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(168,85,247,.4)}
+.btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .5s ease}
+.btn:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(168,85,247,.6)}
+.btn:hover::before{left:100%}
+.btn:active{transform:translateY(-1px)}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:#6b7280;font-size:.85rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(168,85,247,.3),transparent)}
+.error-box{background:rgba(220,38,38,.2);border:1px solid rgba(239,68,68,.5);color:#fca5a5;padding:.8rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:.85rem;display:none}
+@media (max-width:1200px){.auth-wrapper{grid-template-columns:1fr;gap:2rem}.center-icon{display:none}}
+@media (max-width:768px){.container{padding:1rem}.form-panel{padding:2rem}.form-header h2{font-size:1.6rem}.icon-circle{width:80px;height:80px;font-size:2rem}.icon-circle::before{width:100px;height:100px}}
+</style>
+</head>
+<body>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+
+<div class="container">
+<div class="auth-wrapper">
+<!-- Login Form -->
+<div class="form-panel">
+<div class="form-header">
+<h2>🔐 Login</h2>
+<p>Welcome back! Enter your credentials</p>
+</div>
+
+<div class="error-box" id="loginError"></div>
+
+<form id="loginForm">
+<div class="input-group">
+<label>Register Number</label>
+<div class="input-wrapper">
+<span class="input-icon">🪪</span>
+<input type="text" id="loginRegno" placeholder="Enter your register number" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input type="password" id="loginPassword" placeholder="Enter your password" required/>
+</div>
+</div>
+
+<div class="checkbox-group">
+<input type="checkbox" id="rememberMe"/>
+<label for="rememberMe">Remember me</label>
+</div>
+
+<a href="#" class="forgot-link">Forgot password?</a>
+
+<button type="submit" class="btn">🚀 Login to Exam</button>
+</form>
+</div>
+
+<!-- Center Icon -->
+<div class="center-icon">
+<div class="icon-circle">🛡️</div>
+</div>
+
+<!-- Register Form -->
+<div class="form-panel">
+<div class="form-header">
+<h2>📝 Register</h2>
+<p>Create your account to get started</p>
+</div>
+
+<div class="error-box" id="registerError"></div>
+
+<form id="registerForm">
+<div class="input-group">
+<label>Full Name</label>
+<div class="input-wrapper">
+<span class="input-icon">👤</span>
+<input type="text" id="regName" placeholder="Enter your full name" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Phone Number</label>
+<div class="input-wrapper">
+<span class="input-icon">📱</span>
+<input type="tel" id="regPhone" pattern="[0-9]{10}" placeholder="10-digit mobile number" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Email Address</label>
+<div class="input-wrapper">
+<span class="input-icon">📧</span>
+<input type="email" id="regEmail" placeholder="your.email@example.com" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>College Name</label>
+<div class="input-wrapper">
+<span class="input-icon">🏫</span>
+<input type="text" id="regCollege" placeholder="Your college/university" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Register Number</label>
+<div class="input-wrapper">
+<span class="input-icon">🪪</span>
+<input type="text" id="regRegno" placeholder="Your unique register number" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔑</span>
+<input type="password" id="regPassword" placeholder="Create a strong password" required/>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input type="password" id="regConfirmPassword" placeholder="Re-enter your password" required/>
+</div>
+</div>
+
+<button type="submit" class="btn">✅ Register & Start Exam</button>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+// Login Form
+document.getElementById('loginForm').addEventListener('submit',async function(e){
+e.preventDefault();
+const errorBox=document.getElementById('loginError');
+errorBox.style.display='none';
+
+const formData={
+regno:document.getElementById('loginRegno').value.trim(),
+password:document.getElementById('loginPassword').value
+};
+
+try{
+const res=await fetch('/login/',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(formData)
+});
+const data=await res.json();
+if(data.success){
+window.location.href='/exam/';
+}else{
+errorBox.textContent='❌ '+(data.error||'Invalid credentials');
+errorBox.style.display='block';
+}
+}catch(err){
+errorBox.textContent='❌ Server error. Please try again.';
+errorBox.style.display='block';
+}
+});
+
+// Register Form
+document.getElementById('registerForm').addEventListener('submit',async function(e){
+e.preventDefault();
+const errorBox=document.getElementById('registerError');
+errorBox.style.display='none';
+
+const password=document.getElementById('regPassword').value;
+const confirmPassword=document.getElementById('regConfirmPassword').value;
+
+if(password!==confirmPassword){
+errorBox.textContent='❌ Passwords do not match!';
+errorBox.style.display='block';
+return;
+}
+
+const formData={
+name:document.getElementById('regName').value.trim(),
+phone:document.getElementById('regPhone').value.trim(),
+email:document.getElementById('regEmail').value.trim(),
+college:document.getElementById('regCollege').value.trim(),
+regno:document.getElementById('regRegno').value.trim(),
+password:password
+};
+
+try{
+const res=await fetch('/signup/',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(formData)
+});
+const data=await res.json();
+if(data.success){
+window.location.href='/exam/';
+}else{
+errorBox.textContent='❌ '+(data.error||'Registration failed');
+errorBox.style.display='block';
+}
+}catch(err){
+errorBox.textContent='❌ Server error. Please try again.';
+errorBox.style.display='block';
+}
+});
+</script>
+</body>
+</html>
