@@ -59,6 +59,8 @@ Thumbs.db
 *.pem
 *.key
 secrets.json
+EMAIL_HOST_PASSWORD
+.env.example.local
 
 # Temporary files
 *.tmp

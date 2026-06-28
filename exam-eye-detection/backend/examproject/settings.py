@@ -1,13 +1,19 @@
 from pathlib import Path
 import os
+try:
+    from decouple import config
+except ImportError:
+    def config(key, default=None, cast=str):
+        val = os.environ.get(key, default)
+        return cast(val) if val is not None and cast != str else val
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-exam-eye-detection-2024-secret-key')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-exam-eye-detection-2024-secret-key')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = config('DEBUG', default='True', cast=lambda v: v == 'True')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 # Custom error handlers
 handler404 = 'exam.views.custom_404'
@@ -105,6 +111,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', f'ExamGuard <{EMAIL_HOST_USER}>')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=f'ExamGuard <{EMAIL_HOST_USER}>') 

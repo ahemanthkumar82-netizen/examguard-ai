@@ -1,38 +1,51 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Count, Avg
 from django.core.mail import send_mail
 from django.conf import settings
+from functools import wraps
 import json
 from .models import Student, ExamSession, ViolationScreenshot
+
+
+def student_login_required(view_func):
+    """Decorator: redirects to login if student session is missing."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('student_id'):
+            return redirect('index')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 def index(request):
     """Redirect to login page"""
     return redirect('login_page')
 
+def _require_no_auth(request):
+    """Returns redirect if student already logged in, else None."""
+    if request.session.get('student_id'):
+        return redirect('exam')
+    return None
+
 def login_page(request):
     """Modern login page"""
-    return render(request, 'login_new.html')
+    return _require_no_auth(request) or render(request, 'login_new.html')
 
 def register_page(request):
     """Modern registration page"""
-    return render(request, 'register_new.html')
+    return _require_no_auth(request) or render(request, 'register_new.html')
 
 def auth_page(request):
     """Legacy split-screen auth page"""
-    return render(request, 'auth.html')
+    return _require_no_auth(request) or render(request, 'auth.html')
 
+@student_login_required
 def exam_page(request):
     """Exam monitoring page - Only accessible by logged-in student"""
-    student_id = request.session.get('student_id')
-    if not student_id:
-        return redirect('index')
-    
     try:
-        student = Student.objects.get(id=student_id)
+        student = Student.objects.get(id=request.session['student_id'])
         return render(request, 'exam.html', {'student': student})
     except Student.DoesNotExist:
         request.session.flush()
@@ -214,20 +227,14 @@ ExamGuard Team
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
-@csrf_exempt
+@student_login_required
 def log_violation(request):
     """Log violation - Only for logged-in student's own session"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             session_id = request.session.get('session_id')
-            student_id = request.session.get('student_id')
-            
-            # Security check: Ensure student is logged in
-            if not session_id or not student_id:
-                return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
-            
-            # Security check: Verify session belongs to logged-in student
+            student_id = request.session['student_id']
             session = ExamSession.objects.get(id=session_id, student_id=student_id)
             
             session.violations += 1
@@ -248,12 +255,12 @@ def log_violation(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     return JsonResponse({'success': False}, status=400)
 
-@csrf_exempt
+@student_login_required
 def logout_view(request):
     """Logout and end session - Only for logged-in student's own session"""
     if request.method == 'POST':
         session_id = request.session.get('session_id')
-        student_id = request.session.get('student_id')
+        student_id = request.session['student_id']
         
         if session_id and student_id:
             try:
@@ -290,7 +297,6 @@ def students_management(request):
     })
 
 @staff_member_required
-@csrf_exempt
 def create_student(request):
     """Create new student"""
     if request.method == 'POST':
@@ -317,7 +323,6 @@ def create_student(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 @staff_member_required
-@csrf_exempt
 def update_student(request, student_id):
     """Update student"""
     if request.method == 'POST':
@@ -348,7 +353,6 @@ def update_student(request, student_id):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 @staff_member_required
-@csrf_exempt
 def delete_student(request, student_id):
     """Delete student"""
     if request.method == 'POST':
@@ -409,7 +413,6 @@ def violations_report(request):
     })
 
 @staff_member_required
-@csrf_exempt
 def clear_violations(request, session_id):
     """Clear violations for a session"""
     if request.method == 'POST':
@@ -470,7 +473,6 @@ def sessions_management(request):
     })
 
 @staff_member_required
-@csrf_exempt
 def create_session(request):
     """Create new exam session"""
     if request.method == 'POST':
@@ -494,7 +496,6 @@ def create_session(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 @staff_member_required
-@csrf_exempt
 def update_session(request, session_id):
     """Update exam session"""
     if request.method == 'POST':
@@ -525,7 +526,6 @@ def update_session(request, session_id):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 @staff_member_required
-@csrf_exempt
 def delete_session(request, session_id):
     """Delete exam session"""
     if request.method == 'POST':
@@ -557,7 +557,6 @@ def forgot_password_page(request):
     """Forgot password page"""
     return render(request, 'forgot_password.html')
 
-@csrf_exempt
 def forgot_password(request):
     """Send password reset email"""
     if request.method == 'POST':
@@ -611,7 +610,6 @@ def reset_password_page(request, token):
     except Student.DoesNotExist:
         return render(request, 'reset_password_expired.html')
 
-@csrf_exempt
 def reset_password(request):
     """Reset password"""
     if request.method == 'POST':
@@ -638,14 +636,11 @@ def reset_password(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 # Student Dashboard
+@student_login_required
 def student_dashboard(request):
     """Student dashboard"""
-    student_id = request.session.get('student_id')
-    if not student_id:
-        return redirect('index')
-    
     try:
-        student = Student.objects.get(id=student_id)
+        student = Student.objects.get(id=request.session['student_id'])
         sessions = ExamSession.objects.filter(student=student).order_by('-started_at')
         
         # Calculate stats
@@ -667,18 +662,14 @@ def student_dashboard(request):
         return redirect('index')
 
 # Save Screenshot
-@csrf_exempt
+@student_login_required
 def save_screenshot(request):
     """Save violation screenshot"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             session_id = request.session.get('session_id')
-            student_id = request.session.get('student_id')
-            
-            if not session_id or not student_id:
-                return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
-            
+            student_id = request.session['student_id']
             session = ExamSession.objects.get(id=session_id, student_id=student_id)
             
             screenshot_data = data.get('screenshot', '')
@@ -697,15 +688,11 @@ def save_screenshot(request):
     return JsonResponse({'success': False}, status=400)
 
 # Get Timer
-@csrf_exempt
+@student_login_required
 def get_timer(request):
     """Get remaining time for exam"""
     session_id = request.session.get('session_id')
-    student_id = request.session.get('student_id')
-    
-    if not session_id or not student_id:
-        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
-    
+    student_id = request.session['student_id']
     try:
         session = ExamSession.objects.get(id=session_id, student_id=student_id)
         time_left = session.get_time_left()

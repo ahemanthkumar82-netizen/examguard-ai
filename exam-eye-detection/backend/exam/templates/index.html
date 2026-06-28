@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ExamGuard</title>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js" integrity="sha256-NMGF5PVJlLLWdBJmH9yBR1GN7w+1KuJBJJdMdLj1LRo=" crossorigin="anonymous"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9}
@@ -85,8 +85,11 @@ outofbox:'⚠️ Head turned outside camera',
 headturn:'⚠️ Head turned outside camera',
 blocked:'⚠️ Camera blocked or hidden'
 };
-document.getElementById('warningBox').textContent=reasons[reason]||'⚠️ Rule violation';
+const safeMessage=reasons[reason];
+if(safeMessage){
+document.getElementById('warningBox').textContent=safeMessage;
 document.getElementById('warningBox').style.display='block';
+}
 }
 
 document.getElementById('loginForm').addEventListener('submit',async function(e){
@@ -99,8 +102,9 @@ college:document.getElementById('college').value,
 regno:document.getElementById('regno').value
 };
 
+const csrfToken=document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||'';
 try{
-const res=await fetch('/login/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(formData)});
+const res=await fetch('/api/login/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(formData)});
 const data=await res.json();
 if(data.success){
 window.location.href='/exam/';

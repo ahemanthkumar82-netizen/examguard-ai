@@ -3,9 +3,7 @@
 
 # IMPORTANT: Replace 'yourusername' with your actual PythonAnywhere username
 
-# ============================================
-# PRODUCTION SETTINGS FOR PYTHONANYWHERE
-# ============================================
+import os
 
 DEBUG = False  # MUST be False in production
 
@@ -70,12 +68,19 @@ DATABASES = {
 
 # Generate a new SECRET_KEY for production
 # You can generate one at: https://djecrety.ir/
-SECRET_KEY = 'django-insecure-exam-eye-detection-2024-secret-key'  # Change this!
+SECRET_KEY = os.environ['SECRET_KEY']  # Set this in PythonAnywhere environment variables
 
 # Session settings
-SESSION_COOKIE_SECURE = True  # HTTPS only
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+# HTTPS security headers
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
 
 # ============================================
 # MEDIA FILES (if needed)
